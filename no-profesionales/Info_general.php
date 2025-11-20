@@ -1,6 +1,19 @@
 <?php
 session_start();
+if (!isset($_SESSION['acta'])) $_SESSION['acta'] = [];
+
+// Generar código único si no está definido
+if (empty($_SESSION['acta']['codigo_unico'])) {
+    try {
+        $codigo_unico = 'ACTA-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(4)));
+    } catch (Exception $e) {
+        $codigo_unico = 'ACTA-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -8));
+    }
+    $_SESSION['acta']['codigo_unico'] = $codigo_unico;
+}
+
 $d = $_SESSION['acta'] ?? [];
+$codigo = htmlspecialchars($_SESSION['acta']['codigo_unico'] ?? '', ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -20,7 +33,12 @@ $d = $_SESSION['acta'] ?? [];
   <!-- Header -->
   <header class="bg-white/60 backdrop-blur-md shadow-md fixed top-0 left-0 w-full z-50">
     <nav class="max-w-5xl mx-auto flex justify-between items-center p-4">
-      <h1 class="text-xl font-semibold text-gray-800">No Profesionales - Informacion General</h1>
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-semibold text-gray-800">No Profesionales - Informacion General</h1>
+        <span class="text-sm font-mono bg-gray-100 border rounded px-2 py-1 text-gray-700">
+          Código: <?= $codigo ?>
+        </span>
+      </div>
       <ul class="flex items-center space-x-4">
         <li>
           <a href="../SeleccionEscuelas.php" id="cerrarSesionBtn" class="text-red-600 hover:text-red-800 font-medium transition">
