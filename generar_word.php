@@ -1,5 +1,6 @@
 <?php
-session_start(); // Mantiene los datos entre formularios
+
+session_start();
 require __DIR__ . '/vendor/autoload.php';
 
 use PhpOffice\PhpWord\TemplateProcessor;
@@ -11,10 +12,13 @@ if (!is_file($tpl)) {
     exit("No se encontró la plantilla: $tpl");
 }
 
+// Inicializar contenedor de acta en sesión si hace falta
+if (!isset($_SESSION['acta'])) {
+    $_SESSION['acta'] = [];
+}
 
 // Cargar la plantilla
 $tp = new TemplateProcessor($tpl);
-
 
 // Usar el código de sesión si ya existe; si no, generarlo
 if (empty($_SESSION['acta']['codigo_unico'])) {
@@ -28,41 +32,55 @@ if (empty($_SESSION['acta']['codigo_unico'])) {
     $codigo_unico = $_SESSION['acta']['codigo_unico'];
 }
 
-// Evitar que $_POST sobrescriba el código: forzar codigo_unico al final
-$datos = array_merge($_SESSION['acta'] ?? [], $_POST ?? [], ['codigo_unico' => $codigo_unico]);
+// Armar datos asegurando que el código generado no sea sobrescrito.
+// También mapear 'codigo' porque la plantilla tiene ${codigo}
+$datos = array_merge(
+    $_SESSION['acta'] ?? [],
+    $_POST ?? [],
+    [
+        'codigo_unico' => $codigo_unico,
+        'codigo' => $codigo_unico
+    ]
+);
 
-// Función para limpiar valores y manejar arreglos
+// Función para normalizar valores y manejar arrays
 $norm = function ($v) {
-    return is_array($v)
-        ? implode(', ', array_map('trim', $v))
-        : trim((string)$v);
+    if (is_array($v)) {
+        return implode(', ', array_map('trim', $v));
+    }
+    return trim((string)$v);
 };
 
 // Rellenar placeholders con los datos recibidos
 foreach ($datos as $k => $v) {
+    // TemplateProcessor espera el nombre sin llaves: setValue('nombre', 'valor')
     $tp->setValue($k, $norm($v));
 }
 
 // Radios que deben ir en mayúsculas (SI/NO)
 foreach (['recuperacion', 'actualizacion'] as $r) {
-    if (isset($datos[$r])) {
+    if (!empty($datos[$r])) {
         $tp->setValue($r, strtoupper($norm($datos[$r])));
     }
 }
 
-// Asegurar que el placeholder del encabezado reciba el código
+// Asegurar explícitamente que los placeholders del código reciban el valor
 $tp->setValue('codigo_unico', $codigo_unico);
+$tp->setValue('codigo', $codigo_unico);
 
-// Evitar que haya salida previa antes de headers
+// Evitar salida previa que rompa los headers
 if (function_exists('ob_get_length') && ob_get_length()) {
-    ob_end_clean();
+    @ob_end_clean();
 }
 
-// Crear archivo temporal
+// Crear archivo temporal y guardar el .docx
 $tmpFile = tempnam(sys_get_temp_dir(), 'acta_');
 $tp->saveAs($tmpFile);
 
-// Forzar descarga directa al navegador
+// (Opcional) Guardar una copia de depuración en el proyecto para inspección manual
+// @copy($tmpFile, __DIR__ . '/debug_acta_prueba.docx');
+
+// Forzar descarga al navegador
 $nombreDescarga = 'Acta_Inspeccion_' . date('Ymd_His') . '.docx';
 header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
 header('Content-Disposition: attachment; filename="' . $nombreDescarga . '"');
@@ -70,9 +88,10 @@ header('Content-Length: ' . filesize($tmpFile));
 readfile($tmpFile);
 
 // Borrar el archivo temporal
-unlink($tmpFile);
+@unlink($tmpFile);
 
-// Limpiar solo los datos del acta (sin destruir la sesión completa)
-unset($_SESSION['acta']);
+// Conservar solo el código único en la sesión para referencia posterior
+$_SESSION['acta'] = ['codigo_unico' => $codigo_unico];
 
 exit;
+?>
