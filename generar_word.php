@@ -6,7 +6,7 @@ require __DIR__ . '/vendor/autoload.php';
 use PhpOffice\PhpWord\TemplateProcessor;
 
 // Ruta a la plantilla base
-$tpl = __DIR__ . '/plantillas/prueba.docx';
+$tpl = __DIR__ . '/plantillas/test.docx';
 if (!is_file($tpl)) {
     http_response_code(500);
     exit("No se encontró la plantilla: $tpl");
