@@ -217,13 +217,12 @@ function isCheckedLegacy($base, $col, $d) {
       </section>
 
       <div class="flex justify-between items-center pt-4">
-        <button type="submit" formaction="../save.php?next=../profesionales/otro_formulario_anterior.php"
-                class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-5 py-2.5 text-gray-700">
-          Volver
-        </button>
-
-        <button type="submit" class="inline-flex items-center gap-2 rounded-md bg-green-600 px-5 py-2.5 text-white">
-          Guardar y siguiente
+        <button type="submit" id="siguiente"
+          class="inline-flex items-center gap-2 rounded-md bg-green-600 px-5 py-2.5 text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
+            Siguiente
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
         </button>
       </div>
     </form>

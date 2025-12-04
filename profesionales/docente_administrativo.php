@@ -1,5 +1,4 @@
 <?php
-
 session_start();
 $d = $_SESSION['acta'] ?? [];
 
@@ -7,218 +6,229 @@ $d = $_SESSION['acta'] ?? [];
 function val($key, $d, $def = '') {
     return htmlspecialchars($d[$key] ?? $def, ENT_QUOTES, 'UTF-8');
 }
-function chkRadio($key, $v, $d) {
-    return (isset($d[$key]) && $d[$key] === $v) ? 'checked' : '';
+function valRow($base, $i, $field, $d, $def = '') {
+    if (!empty($d[$base]) && isset($d[$base][$i]) && isset($d[$base][$i][$field])) {
+        return htmlspecialchars($d[$base][$i][$field], ENT_QUOTES, 'UTF-8');
+    }
+    return htmlspecialchars($def, ENT_QUOTES, 'UTF-8');
 }
-function inArr($key, $value, $d) {
-    $arr = $d[$key] ?? [];
-    if (!is_array($arr)) $arr = $arr === '' ? [] : explode(',', (string)$arr);
-    return in_array($value, $arr) ? 'checked' : '';
+function chkRadioRow($base, $i, $field, $v, $d) {
+    if (!empty($d[$base]) && isset($d[$base][$i]) && isset($d[$base][$i][$field]) && (string)$d[$base][$i][$field] === (string)$v) return 'checked';
+    return '';
 }
+function chkRadio($key, $v, $d) { return (isset($d[$key]) && (string)$d[$key] === (string)$v) ? 'checked' : ''; }
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Identificación Institucional — Acta</title>
+  <title>Docente / Administrativo — Acta</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../css/deslizamiento.css">
 </head>
 <body class="bg-gradient-to-br from-green-100 via-blue-100 to-slate-100 text-gray-900">
   <header class="bg-white/60 backdrop-blur-md shadow-md fixed top-0 left-0 w-full z-50">
-    <nav class="max-w-5xl mx-auto flex justify-between items-center p-4">
-      <h1 class="text-xl font-semibold text-gray-800">Identificación Institucional</h1>
-      <ul class="flex items-center space-x-4">
-        <li><a href="../SeleccionEscuelas.php" class="text-red-600 hover:text-red-800">Atrás</a></li>
-      </ul>
+    <nav class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-lg font-semibold">Talento Humano — Docente & Administrativo</h1>
+      <a href="../SeleccionEscuelas.php" class="text-red-600">Atrás</a>
     </nav>
   </header>
 
-  <main class="max-w-5xl mx-auto mt-24 p-6 bg-white rounded shadow">
-    <form action="../save.php?next=../profesionales/docente_administrativo.php" method="post" id="form_identificacion" class="space-y-6">
+  <main class="max-w-6xl mx-auto mt-24 p-6 bg-white rounded shadow">
+    <form action="../save.php?next=../profesionales/instructores_consejo.php" method="post" class="space-y-6">
 
-      <!-- Primera fila: Formato Inspección, Provincia, Representante Legal -->
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Formato de Inspección Nro.</label>
-          <input name="docente_formato_inspeccion" value="<?= val('docente_formato_inspeccion', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium">Provincia</label>
-          <input name="docente_provincia" value="<?= val('docente_provincia', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium">Nombre de Representante Legal</label>
-          <input name="docente_representante" value="<?= val('docente_representante', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-      </div>
-
-      <!-- Director administrativo y periodo -->
-      <div class="grid grid-cols-3 gap-4">
-        <div class="col-span-2">
-          <label class="block text-sm font-medium">Nombre del Director Administrativo</label>
-          <input name="docente_director_nombre" value="<?= val('docente_director_nombre', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Periodo (Desde - Hasta)</label>
-          <div class="flex gap-2">
-            <input type="date" name="docente_director_desde" value="<?= val('docente_director_desde', $d) ?>" class="w-1/2 rounded border p-2" />
-            <input type="date" name="docente_director_hasta" value="<?= val('docente_director_hasta', $d) ?>" class="w-1/2 rounded border p-2" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Cantón / Dirección / Teléfono -->
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Cantón</label>
-          <input name="docente_canton" value="<?= val('docente_canton', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Dirección</label>
-          <input name="docente_direccion" value="<?= val('docente_direccion', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Número telefónico</label>
-          <input name="docente_telefono" value="<?= val('docente_telefono', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-      </div>
-
-      <!-- Correo / Web -->
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Correo electrónico</label>
-          <input name="docente_email" value="<?= val('docente_email', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Página Web (opcional)</label>
-          <input name="docente_web" value="<?= val('docente_web', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Observaciones (Identificación)</label>
-          <input name="docente_ident_observaciones" value="<?= val('docente_ident_observaciones', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-      </div>
-
-      <!-- Nro. Resolución / Fecha -->
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Nro. Resolución de Funcionamiento</label>
-          <input name="docente_resolucion" value="<?= val('docente_resolucion', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Fecha resolución</label>
-          <input type="date" name="docente_resolucion_fecha" value="<?= val('docente_resolucion_fecha', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium">Clases teóricas presenciales</label>
-          <input name="docente_clases_presenciales" value="<?= val('docente_clases_presenciales', $d) ?>" class="mt-1 w-full rounded border p-2" placeholder="ej. Sí/No o número" />
-        </div>
-      </div>
-
-      <!-- Clases teóricas virtuales / Observaciones generales del bloque -->
-      <div class="grid grid-cols-3 gap-4">
-        <div>
-          <label class="block text-sm font-medium">Clases teóricas virtuales</label>
-          <input name="docente_clases_virtuales" value="<?= val('docente_clases_virtuales', $d) ?>" class="mt-1 w-full rounded border p-2" placeholder="ej. Sí/No o número" />
-        </div>
-        <div class="col-span-2">
-          <label class="block text-sm font-medium">Observaciones (clases / identificación)</label>
-          <input name="docente_clases_observaciones" value="<?= val('docente_clases_observaciones', $d) ?>" class="mt-1 w-full rounded border p-2" />
-        </div>
-      </div>
-
-      <!-- Tipo de curso: filas con observaciones -->
-      <div>
-        <label class="block text-sm font-medium mb-2">Tipo de curso (marcar y agregar observaciones por fila)</label>
-        <div class="overflow-x-auto border rounded">
-          <table class="w-full text-sm">
+      <!-- ADMINISTRATIVO (posiciones fijas) -->
+      <!-- ...existing code... -->
+      <section>
+        <h2 class="font-semibold mb-2">ADMINISTRATIVO — Nómina del personal administrativo</h2>
+        <?php
+          $positions = [
+            'DIRECTOR ADMINISTRATIVO','DIRECTOR PEDAGÓGICO','INSPECTOR','SECRETARIO',
+            'RECEPCIONISTA','CONTADOR','ASESOR TÉCNICO EN SEGURIDAD VIAL',
+            'EVALUADOR PSICOLÓGICO (Título en Psicología)','TESORERO',
+            'EVALUADOR PSICOSENSOMÉTRICO (Médico General)'
+          ];
+        ?>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
             <thead>
               <tr class="bg-gray-100">
-                <th class="p-2 border">Tipo</th>
-                <th class="p-2 border">¿Aplica?</th>
-                <th class="p-2 border">Observaciones</th>
+                <th class="border p-2">Cargo</th>
+                <th class="border p-2">Nombres y apellidos</th>
+                <th class="border p-2">Fecha de contrato</th>
+                <th class="border p-2">Documento relación laboral (SI/NO)</th>
+                <th class="border p-2">¿Entrega hojas de vida? (SI/NO)</th>
+                <th class="border p-2">Certificaciones de experiencia (SI/NO)</th>
+                <th class="border p-2">Observaciones</th>
               </tr>
             </thead>
             <tbody>
-              <?php $tipos = ['A1','A','C1','C','D','E','G']; ?>
-              <?php foreach($tipos as $t): ?>
+              <?php foreach ($positions as $idx => $pos): $i = $idx + 1; ?>
                 <tr>
-                  <td class="p-2 border font-medium"><?= $t ?></td>
-                  <td class="p-2 border text-center">
-                    <input type="checkbox" name="docente_tipo_curso[]" value="<?= $t ?>" <?= inArr('docente_tipo_curso', $t, $d) ?> />
+                  <td class="border p-1 font-medium"><?= htmlspecialchars($pos, ENT_QUOTES, 'UTF-8') ?></td>
+                  <td class="border p-1">
+                    <input name="admin[<?= $i ?>][nombre]" value="<?= valRow('admin',$i,'nombre',$d) ?>" class="w-full rounded border p-1 text-sm" />
                   </td>
-                  <td class="p-2 border">
-                    <input name="docente_tipo_observacion_<?= $t ?>" value="<?= val('docente_tipo_observacion_'.$t, $d) ?>" class="w-full rounded border p-1" />
+                  <td class="border p-1">
+                    <input type="date" name="admin[<?= $i ?>][fecha_contrato]" value="<?= valRow('admin',$i,'fecha_contrato',$d) ?>" class="w-full rounded border p-1 text-sm" />
+                  </td>
+                  <td class="border p-1 text-center">
+                    <label class="inline-flex items-center mr-1">
+                      <input type="radio" name="admin[<?= $i ?>][doc_relacion]" value="SI" <?= chkRadioRow('admin',$i,'doc_relacion','SI',$d) ?> /> SI
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input type="radio" name="admin[<?= $i ?>][doc_relacion]" value="NO" <?= chkRadioRow('admin',$i,'doc_relacion','NO',$d) ?> /> NO
+                    </label>
+                  </td>
+                  <td class="border p-1 text-center">
+                    <label class="inline-flex items-center mr-1">
+                      <input type="radio" name="admin[<?= $i ?>][hojas_vida]" value="SI" <?= chkRadioRow('admin',$i,'hojas_vida','SI',$d) ?> /> SI
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input type="radio" name="admin[<?= $i ?>][hojas_vida]" value="NO" <?= chkRadioRow('admin',$i,'hojas_vida','NO',$d) ?> /> NO
+                    </label>
+                  </td>
+                  <td class="border p-1 text-center">
+                    <label class="inline-flex items-center mr-1">
+                      <input type="radio" name="admin[<?= $i ?>][cert_exper]" value="SI" <?= chkRadioRow('admin',$i,'cert_exper','SI',$d) ?> /> SI
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input type="radio" name="admin[<?= $i ?>][cert_exper]" value="NO" <?= chkRadioRow('admin',$i,'cert_exper','NO',$d) ?> /> NO
+                    </label>
+                  </td>
+                  <td class="border p-1">
+                    <input name="admin[<?= $i ?>][observaciones]" value="<?= valRow('admin',$i,'observaciones',$d) ?>" class="w-full rounded border p-1 text-sm" />
                   </td>
                 </tr>
               <?php endforeach; ?>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
+      <!-- ...existing code... -->
+
+      <!-- DOCENTE (nómina) -->
+      <!-- ...existing code... -->
+      <section>
+        <h2 class="font-semibold mb-2">DOCENTE — Nómina del personal docente</h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="border p-2">#</th>
+                <th class="border p-2">Nombres y apellidos</th>
+                <th class="border p-2">Cátedra de</th>
+                <th class="border p-2">Fecha de contrato</th>
+                <th class="border p-2">Documento relación laboral (SI/NO)</th>
+                <th class="border p-2">¿Entrega hojas de vida? (SI/NO)</th>
+                <th class="border p-2">Certificaciones de experiencia (SI/NO)</th>
+                <th class="border p-2">Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <?php for ($r = 1; $r <= 10; $r++): ?>
+                <tr>
+                  <td class="border p-1 text-center"><?= $r ?></td>
+
+                  <td class="border p-1">
+                    <input name="docente[<?= $r ?>][nombre]" value="<?= valRow('docente',$r,'nombre',$d) ?>" class="w-full rounded border p-1 text-sm" />
+                  </td>
+
+                  <td class="border p-1">
+                    <input name="docente[<?= $r ?>][catedra]" value="<?= valRow('docente',$r,'catedra',$d) ?>" class="w-full rounded border p-1 text-sm" />
+                  </td>
+
+                  <td class="border p-1">
+                    <input type="date" name="docente[<?= $r ?>][fecha_contrato]" value="<?= valRow('docente',$r,'fecha_contrato',$d) ?>" class="w-full rounded border p-1 text-sm" />
+                  </td>
+
+                  <td class="border p-1 text-center">
+                    <label class="inline-flex items-center mr-1">
+                      <input type="radio" name="docente[<?= $r ?>][doc_relacion]" value="SI" <?= chkRadioRow('docente',$r,'doc_relacion','SI',$d) ?> /> SI
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input type="radio" name="docente[<?= $r ?>][doc_relacion]" value="NO" <?= chkRadioRow('docente',$r,'doc_relacion','NO',$d) ?> /> NO
+                    </label>
+                  </td>
+
+                  <td class="border p-1 text-center">
+                    <label class="inline-flex items-center mr-1">
+                      <input type="radio" name="docente[<?= $r ?>][hojas_vida]" value="SI" <?= chkRadioRow('docente',$r,'hojas_vida','SI',$d) ?> /> SI
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input type="radio" name="docente[<?= $r ?>][hojas_vida]" value="NO" <?= chkRadioRow('docente',$r,'hojas_vida','NO',$d) ?> /> NO
+                    </label>
+                  </td>
+
+                  <td class="border p-1 text-center">
+                    <label class="inline-flex items-center mr-1">
+                      <input type="radio" name="docente[<?= $r ?>][cert_exper]" value="SI" <?= chkRadioRow('docente',$r,'cert_exper','SI',$d) ?> /> SI
+                    </label>
+                    <label class="inline-flex items-center">
+                      <input type="radio" name="docente[<?= $r ?>][cert_exper]" value="NO" <?= chkRadioRow('docente',$r,'cert_exper','NO',$d) ?> /> NO
+                    </label>
+                  </td>
+
+                  <td class="border p-1">
+                    <input name="docente[<?= $r ?>][observaciones]" value="<?= valRow('docente',$r,'observaciones',$d) ?>" class="w-full rounded border p-1 text-sm" />
+                  </td>
+                </tr>
+              <?php endfor; ?>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <!-- ...existing code... -->
 
       <!-- IDENTIFICACIÓN DE RESPONSABILIDAD DE LA INSPECCIÓN -->
-      <div>
-        <h3 class="font-semibold mb-2">IDENTIFICACIÓN DE RESPONSABILIDAD DE LA INSPECCIÓN</h3>
-        <div class="grid grid-cols-3 gap-4">
+      <section>
+        <h3 class="font-semibold">IDENTIFICACIÓN DE RESPONSABILIDAD DE LA INSPECCIÓN</h3>
+        <div class="grid grid-cols-3 gap-4 mt-2">
           <div class="p-3 border rounded">
             <h4 class="font-medium">Funcionario de la ANT</h4>
             <label class="block text-xs mt-2">Nombre</label>
-            <input name="inspeccion_func_nombre" value="<?= val('inspeccion_func_nombre', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_fun_nombre" value="<?= val('talent_fun_nombre',$d) ?>" class="mt-1 w-full rounded border p-2" />
             <label class="block text-xs mt-2">Firma</label>
-            <input name="inspeccion_func_firma" value="<?= val('inspeccion_func_firma', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_fun_firma" value="<?= val('talent_fun_firma',$d) ?>" class="mt-1 w-full rounded border p-2" />
             <label class="block text-xs mt-2">C.I.</label>
-            <input name="inspeccion_func_ci" value="<?= val('inspeccion_func_ci', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_fun_ci" value="<?= val('talent_fun_ci',$d) ?>" class="mt-1 w-full rounded border p-2" />
             <label class="block text-xs mt-2">Cargo</label>
-            <input name="inspeccion_func_cargo" value="<?= val('inspeccion_func_cargo', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_fun_cargo" value="<?= val('talent_fun_cargo',$d) ?>" class="mt-1 w-full rounded border p-2" />
           </div>
 
           <div class="p-3 border rounded flex flex-col items-center justify-center">
             <label class="block text-sm">Fecha de inspección</label>
-            <input type="date" name="inspeccion_fecha" value="<?= val('inspeccion_fecha', $d) ?>" class="mt-1 rounded border p-2" />
+            <input type="date" name="talent_fecha" value="<?= val('talent_fecha',$d) ?>" class="mt-1 rounded border p-2" />
           </div>
 
           <div class="p-3 border rounded">
-            <h4 class="font-medium">Responsable de proporcionar información</h4>
+            <h4 class="font-medium">Responsable de la Escuela</h4>
             <label class="block text-xs mt-2">Nombre</label>
-            <input name="inspeccion_resp_nombre" value="<?= val('inspeccion_resp_nombre', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_resp_nombre" value="<?= val('talent_resp_nombre',$d) ?>" class="mt-1 w-full rounded border p-2" />
             <label class="block text-xs mt-2">Firma</label>
-            <input name="inspeccion_resp_firma" value="<?= val('inspeccion_resp_firma', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_resp_firma" value="<?= val('talent_resp_firma',$d) ?>" class="mt-1 w-full rounded border p-2" />
             <label class="block text-xs mt-2">C.I.</label>
-            <input name="inspeccion_resp_ci" value="<?= val('inspeccion_resp_ci', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_resp_ci" value="<?= val('talent_resp_ci',$d) ?>" class="mt-1 w-full rounded border p-2" />
             <label class="block text-xs mt-2">Cargo</label>
-            <input name="inspeccion_resp_cargo" value="<?= val('inspeccion_resp_cargo', $d) ?>" class="mt-1 w-full rounded border p-2" />
+            <input name="talent_resp_cargo" value="<?= val('talent_resp_cargo',$d) ?>" class="mt-1 w-full rounded border p-2" />
           </div>
         </div>
-      </div>
+      </section>
 
-      <!-- Observaciones generales -->
-      <div>
+      <section>
         <label class="block text-sm font-medium">OBSERVACIONES GENERALES</label>
-        <textarea name="docente_observaciones_generales" rows="5" class="mt-1 w-full rounded border p-2"><?= val('docente_observaciones_generales', $d) ?></textarea>
-      </div>
+        <textarea name="talent_observaciones_generales" rows="4" class="mt-1 w-full rounded border p-2"><?= val('talent_observaciones_generales',$d) ?></textarea>
+      </section>
 
       <div class="flex justify-between items-center pt-4">
-        <button type="submit" formaction="../save.php?next=../profesionales/otro_formulario_anterior.php"
-                class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-5 py-2.5 text-gray-700">
-          Volver
+        <button type="submit" id="siguiente"
+          class="inline-flex items-center gap-2 rounded-md bg-green-600 px-5 py-2.5 text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400">
+            Siguiente
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
         </button>
-
-        <!-- Generar Word-->
-                <button type="submit"
-                    formaction="../save.php?next=../generar_word.php"
-                    class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    Generar Word
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
-                        <path d="M14 3.5V9h5.5" fill="white" opacity=".25" />
-                        <path d="M12 11v5m0 0l-2.5-2.5M12 16l2.5-2.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
       </div>
     </form>
   </main>
