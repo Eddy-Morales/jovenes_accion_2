@@ -49,7 +49,7 @@ function isCheckedLegacy($base, $col, $d) {
   </header>
 
   <main class="max-w-6xl mx-auto mt-24 p-6 bg-white rounded shadow">
-    <form action="../save.php?next=../profesionales/instalaciones_1.php" method="post" id="form_instalaciones" class="space-y-6">
+    <form action="../save.php?next=../profesionales/instalaciones_2.php" method="post" id="form_instalaciones" class="space-y-6">
 
       <!-- Área administrativa - campos libres -->
       <section>
