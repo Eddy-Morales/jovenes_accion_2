@@ -218,9 +218,9 @@ function chkRadio($key, $v, $d) { return (isset($d[$key]) && (string)$d[$key] ==
 
       <div class="flex justify-between items-center pt-4">
                 <button type="submit"
-                    formaction="../save.php?next=../generar_word.php"
-                    class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    Generar Word
+                  formaction="../save.php?next=generar_word.php"
+                  class="inline-flex items-center gap-2 rounded-md bg-blue-600 px-5 py-2.5 text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  Generar Word
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" />
                         <path d="M14 3.5V9h5.5" fill="white" opacity=".25" />
